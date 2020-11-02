@@ -4724,7 +4724,7 @@ function test(q: GetEntityBrandDataQuery): void {
   });
 
   describe('conditional directives handling', () => {
-    it('fileds with @skip, @include should pre resolve into optional', async () => {
+    it('#3836 - @skip, @include should result in optional fields', async () => {
       const schema = buildSchema(/* GraphQL */ `
         type Query {
           user: User!
@@ -4764,56 +4764,7 @@ function test(q: GetEntityBrandDataQuery): void {
       
       export type UserQuery = { __typename?: 'Query', user: { __typename?: 'User', name: string, address?: Maybe<string> } };`);
     });
-
-    // it('objects with @skip, @include should pre resolve into optional', async () => {
-    //   const schema = buildSchema(/* GraphQL */ `
-    //     type Query {
-    //       user: User!
-    //     }
-
-    //     type User {
-    //       id: String!
-    //       name: String!
-    //       address: Address!
-    //     }
-
-    //     type Address {
-    //       city: String!
-    //     }
-    //   `);
-
-    //   const fragment = parse(/* GraphQL */ `
-    //     query user($showAddress: Boolean!, $showName: Boolean!) {
-    //       user {
-    //         id
-    //         name @include(if: $showName)
-    //         address @include(if: $showAddress) {
-    //           city
-    //         }
-    //       }
-    //     }
-    //   `);
-
-    //   const { content } = await plugin(
-    //     schema,
-    //     [{ location: '', document: fragment }],
-    //     {
-    //       preResolveTypes: true,
-    //     },
-    //     {
-    //       outputFile: 'graphql.ts',
-    //     }
-    //   );
-
-    //   expect(content).toBeSimilarStringTo(`
-    //   export type UserQueryVariables = Exact<{
-    //     showAddress: Scalars['Boolean'];
-    //     showName: Scalars['Boolean'];
-    //   }>;
-
-    //   export type UserQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, name?: Maybe<string>, address?: Maybe<{ __typename?: 'Address', city: string}> } };`);
-    // });
-
+    
     it('fileds with @skip, @include should make container resolve into MakeOptional type', async () => {
       const schema = buildSchema(/* GraphQL */ `
         type Query {
