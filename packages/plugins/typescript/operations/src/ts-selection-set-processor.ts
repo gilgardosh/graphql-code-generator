@@ -75,7 +75,6 @@ export class TypeScriptSelectionSetProcessor extends BaseSelectionSetProcessor<S
             aliasedField.fieldName === '__typename'
               ? `'${schemaType.name}'`
               : `${parentName}['${aliasedField.fieldName}']`;
-
           return `${aliasedField.alias}: ${value}`;
         })
         .join(', ')} }`,
