@@ -14,46 +14,36 @@ describe('Flow Operations Plugin', () => {
       profile: Profile
       role: Role
     }
-
     type Profile {
       age: Int
       firstName: String!
     }
-
     type Mutation {
       login(username: String!, password: String!): User
     }
-
     type Subscription {
       userCreated: User
     }
-
     interface Notifiction {
       id: ID!
     }
-
     type TextNotification implements Notifiction {
       id: ID!
       text: String!
     }
-
     type ImageNotification implements Notifiction {
       id: ID!
       imageUrl: String!
       metadata: ImageMetadata!
     }
-
     type ImageMetadata {
       createdBy: String!
     }
-
     enum Role {
       USER
       ADMIN
     }
-
     union MyUnion = User | Profile
-
     type Query {
       me: User
       unionTest: MyUnion
@@ -65,7 +55,6 @@ describe('Flow Operations Plugin', () => {
       dummyNonNullArrayWithValues: [String!]!
       dummyWithType: Profile
     }
-
     schema {
       query: Query
       mutation: Mutation
@@ -79,11 +68,9 @@ describe('Flow Operations Plugin', () => {
         query notifications {
           notifications {
             id
-
             ... on TextNotification {
               text
             }
-
             ... on ImageNotification {
               imageUrl
               metadata {
@@ -131,11 +118,9 @@ describe('Flow Operations Plugin', () => {
         query notifications {
           notifications {
             id
-
             ... on TextNotification {
               text
             }
-
             ... on ImageNotification {
               imageUrl
               metadata {
@@ -186,11 +171,9 @@ describe('Flow Operations Plugin', () => {
         query notifications {
           notifications {
             id
-
             ... on TextNotification {
               text
             }
-
             ... on ImageNotification {
               imageUrl
               metadata {
@@ -326,7 +309,6 @@ describe('Flow Operations Plugin', () => {
             ... on User {
               id
             }
-
             ... on Profile {
               age
             }
@@ -369,7 +351,6 @@ describe('Flow Operations Plugin', () => {
             ... on User {
               id
             }
-
             ... on Profile {
               age
             }
@@ -410,11 +391,9 @@ describe('Flow Operations Plugin', () => {
         query notifications {
           notifications {
             id
-
             ... on TextNotification {
               text
             }
-
             ... on ImageNotification {
               imageUrl
               metadata {
@@ -488,7 +467,6 @@ describe('Flow Operations Plugin', () => {
         query {
           dummy
         }
-
         query {
           dummy
         }
@@ -525,7 +503,6 @@ describe('Flow Operations Plugin', () => {
           }
           role
         }
-
         query me {
           me {
             ...UserFields
@@ -560,7 +537,6 @@ describe('Flow Operations Plugin', () => {
           }
           role
         }
-
         query me {
           me {
             ...UserFields
@@ -595,7 +571,6 @@ describe('Flow Operations Plugin', () => {
           }
           role
         }
-
         query me {
           me {
             ...UserFields
@@ -628,7 +603,6 @@ describe('Flow Operations Plugin', () => {
             age
           }
         }
-
         query me {
           me {
             ...UserFields
@@ -664,13 +638,11 @@ describe('Flow Operations Plugin', () => {
         fragment UserFields on User {
           id
         }
-
         fragment UserProfile on User {
           profile {
             age
           }
         }
-
         query me {
           me {
             ...UserFields
@@ -709,11 +681,9 @@ describe('Flow Operations Plugin', () => {
         query notifications {
           notifications {
             id
-
             ... on TextNotification {
               text
             }
-
             ... on ImageNotification {
               imageUrl
               metadata {
@@ -753,7 +723,6 @@ describe('Flow Operations Plugin', () => {
             ... on User {
               id
             }
-
             ... on Profile {
               age
             }
@@ -1217,7 +1186,6 @@ describe('Flow Operations Plugin', () => {
         type Query {
           user: User!
         }
-
         type User {
           id: String!
           name: String
@@ -1252,7 +1220,6 @@ describe('Flow Operations Plugin', () => {
       export type UserQueryVariables = {
         showAddress: $ElementType<Scalars, 'Boolean'>,
       };
-
       export type UserQuery = { user: $MakeOptional<$Pick<User, { id: *, name?: *, address: * }>, { address: * }> };
       `);
 
