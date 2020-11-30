@@ -410,6 +410,7 @@ describe('Apollo Angular', () => {
 
       await validateTypeScript(content, modifiedSchema, docs, {});
     });
+
     it('should be allowed to define custom operation suffixes in config', async () => {
       const modifiedSchema = extendSchema(schema, addToSchema);
       const myFeed = gql(`
@@ -466,6 +467,31 @@ describe('Apollo Angular', () => {
       expect(content.content).toContain(`export class VoteMutationService`);
       await validateTypeScript(content, modifiedSchema, docs, {});
     });
+  });
+
+  it('Mistyped Gql data', async () => {
+    const modifiedSchema = extendSchema(schema, addToSchema);
+    const vote = gql(`
+    mutation vote($repoFullName: String!) {
+      vote(repoFullName: $repoFullName) {
+        score
+        id
+      }
+      
+    `);
+    const docs = [{ location: '', document: vote }];
+    const content = (await plugin(
+      modifiedSchema,
+      docs,
+      {
+        mutationSuffix: 'MutationService',
+      },
+      {
+        outputFile: 'graphql.ts',
+      }
+    )) as Types.ComplexPluginOutput;
+
+    await validateTypeScript(content, modifiedSchema, docs, {});
   });
 
   describe('SDK Service', () => {
