@@ -1,21 +1,7 @@
 import { TempDir } from './utils';
-<<<<<<< HEAD
-import { createContext, executeCodegen, parseArgv } from '../src';
-
-const mockConfig = (str: string, file = './config.yml') => {
-  temp.createFile(file, str);
-  temp.createFile(
-    './gil-test.graphql',
-    `type Query @nonExisting {
-    foo: String!
-  }`
-  );
-};
-=======
 import { createContext, parseArgv } from '../src/config';
 
 const mockConfig = (str: string, file = './codegen.yml') => temp.createFile(file, str);
->>>>>>> a93dff02... config test
 const createArgv = (str = ''): string[] => {
   const result = ['node', 'fake.js'];
   const regexp = /([^\s'"]+(['"])([^\2]*?)\2)|[^\s'"]+|(['"])([^\4]*?)\4/gi;
@@ -49,39 +35,6 @@ describe('CLI Flags', () => {
   });
 
   it('Gil test', async () => {
-<<<<<<< HEAD
-    mockConfig(
-      `
-      config:
-        federation: true
-      schema:
-        - "./gil-test.graphql"
-      extensions:
-        codegen:
-          generates:
-            ./types.generated.ts:
-              plugins:
-                - typescript
-                - typescript-operations
-                - typescript-resolvers
-                - add:
-                    placement: prepend
-                    content: "import { DeepPartial } from 'utility-types';"
-              config:
-                federation: true
-                defaultMapper: DeepPartial<{T}>
-    `,
-      '.graphqlrc'
-    );
-    const args2 = createArgv('--config .graphqlrc');
-    const parsedeArgs = parseArgv(args2);
-    const context2 = await createContext(parsedeArgs);
-    // const config2 = context2.getConfig();
-    const result = await executeCodegen(context2);
-    // expect(config).toEqual(config2);
-    // expect(config2.schema[0]).toEqual('./gil-test.graphql');
-  });
-=======
     // mockConfig(`
     // schema:
     //   - './packages/modules/**/schema/**/*.gql'
@@ -150,5 +103,4 @@ describe('CLI Flags', () => {
   //   expect(config.schema).toEqual('schema.graphql');
   //   expect(config.generates).toEqual({ 'file.ts': ['plugin'] });
   // });
->>>>>>> a93dff02... config test
 });
