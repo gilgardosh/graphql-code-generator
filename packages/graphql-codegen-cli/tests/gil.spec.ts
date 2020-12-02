@@ -3,7 +3,12 @@ import { createContext, executeCodegen, parseArgv } from '../src';
 
 const mockConfig = (str: string, file = './config.yml') => {
   temp.createFile(file, str);
-  temp.createFile('./gil-test.graphql', 'type Query @nonExisting {}');
+  temp.createFile(
+    './gil-test.graphql',
+    `type Query @nonExisting {
+    foo: String!
+  }`
+  );
 };
 const createArgv = (str = ''): string[] => {
   const result = ['node', 'fake.js'];
@@ -38,27 +43,6 @@ describe('CLI Flags', () => {
   });
 
   it('Gil test', async () => {
-    // mockConfig(`
-    // schema:
-    //   - './packages/modules/**/schema/**/*.gql'
-    // generates:
-    //   ./packages/core/src/generated/global.gql.types.generated.ts:
-    //     plugins:
-    //       - typescript
-    //       - typescript-operations
-    //       - typescript-resolvers
-    //       - add:
-    //           placement: prepend
-    //           content: "import { DeepPartial } from 'utility-types';"
-    //     config:
-    //       defaultMapper: DeepPartial<{T}>
-    //       federation: true
-    // watch: true
-    // overwrite: true
-    // `);
-    // const args = createArgv();
-    // const context = await createContext(parseArgv(args));
-    // const config = JSON.stringify(context.getConfig());
     mockConfig(
       `
       config:
@@ -85,7 +69,7 @@ describe('CLI Flags', () => {
     const args2 = createArgv('--config .graphqlrc');
     const parsedeArgs = parseArgv(args2);
     const context2 = await createContext(parsedeArgs);
-    const config2 = context2.getConfig();
+    // const config2 = context2.getConfig();
     const result = await executeCodegen(context2);
     // expect(config).toEqual(config2);
     // expect(config2.schema[0]).toEqual('./gil-test.graphql');
