@@ -57,27 +57,35 @@ describe('React-Query', () => {
     it('Should generate query correctly with external mapper', async () => {
       const config = {
         fetcher: './my-file#myCustomFetcher',
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
 
       expect(out.prepend).toContain(
-        `import { useQuery, QueryConfig, useMutation, MutationConfig } from 'react-query';`
+        `import { useQuery, UseQueryOptions, useMutation, UseMutationOptions } from 'react-query';`
       );
       expect(out.prepend).toContain(`import { myCustomFetcher } from './my-file';`);
-      expect(out.content)
-        .toBeSimilarStringTo(`export const useTestQuery = (variables?: TestQueryVariables, options?: QueryConfig<TestQuery>) => 
-      useQuery<TestQuery>(
-        ['test', variables],
-        myCustomFetcher<TestQuery, TestQueryVariables>(TestDocument, variables),
+      expect(out.content).toBeSimilarStringTo(`export const useTestQuery = <
+          TData = TTestQuery,
+          TError = unknown
+        >(
+          variables?: TTestQueryVariables, 
+          options?: UseQueryOptions<TTestQuery, TError, TData>
+        ) => 
+        useQuery<TTestQuery, TError, TData>(
+          ['test', variables],
+          myCustomFetcher<TTestQuery, TTestQueryVariables>(TestDocument, variables),
+          options
+        );`);
+      expect(out.content).toBeSimilarStringTo(`export const useTestMutation = <
+        TError = unknown,
+        TContext = unknown
+      >(options?: UseMutationOptions<TTestMutation, TError, TTestMutationVariables, TContext>) => 
+      useMutation<TTestMutation, TError, TTestMutationVariables, TContext>(
+        (variables?: TTestMutationVariables) => myCustomFetcher<TTestMutation, TTestMutationVariables>(TestDocument, variables)(),
         options
       );`);
-      expect(out.content)
-        .toBeSimilarStringTo(`    export const useTestMutation = (variables?: TestMutationVariables, options?: MutationConfig<TestMutation, unknown, TestMutationVariables>) => 
-    useMutation<TestMutation, unknown, TestMutationVariables>(
-      myCustomFetcher<TestMutation, TestMutationVariables>(TestDocument, variables),
-      options
-    );`);
 
       expect(out.content).toMatchSnapshot();
       await validateTypeScript(mergeOutputs(out), schema, docs, config, false);
@@ -86,27 +94,35 @@ describe('React-Query', () => {
     it('Should generate query correctly with internal mapper', async () => {
       const config = {
         fetcher: 'myCustomFetcher',
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
 
       expect(out.prepend).toContain(
-        `import { useQuery, QueryConfig, useMutation, MutationConfig } from 'react-query';`
+        `import { useQuery, UseQueryOptions, useMutation, UseMutationOptions } from 'react-query';`
       );
-      expect(out.content)
-        .toBeSimilarStringTo(`export const useTestQuery = (variables?: TestQueryVariables, options?: QueryConfig<TestQuery>) => 
-      useQuery<TestQuery>(
+      expect(out.content).toBeSimilarStringTo(`export const useTestQuery = <
+        TData = TTestQuery,
+        TError = unknown
+      >(
+        variables?: TTestQueryVariables, 
+        options?: UseQueryOptions<TTestQuery, TError, TData>
+      ) => 
+      useQuery<TTestQuery, TError, TData>(
         ['test', variables],
-        myCustomFetcher<TestQuery, TestQueryVariables>(TestDocument, variables),
+        myCustomFetcher<TTestQuery, TTestQueryVariables>(TestDocument, variables),
         options
       );`);
 
-      expect(out.content)
-        .toBeSimilarStringTo(`    export const useTestMutation = (variables?: TestMutationVariables, options?: MutationConfig<TestMutation, unknown, TestMutationVariables>) => 
-    useMutation<TestMutation, unknown, TestMutationVariables>(
-      myCustomFetcher<TestMutation, TestMutationVariables>(TestDocument, variables),
-      options
-    );`);
+      expect(out.content).toBeSimilarStringTo(`export const useTestMutation = <
+        TError = unknown,
+        TContext = unknown
+      >(options?: UseMutationOptions<TTestMutation, TError, TTestMutationVariables, TContext>) => 
+      useMutation<TTestMutation, TError, TTestMutationVariables, TContext>(
+        (variables?: TTestMutationVariables) => myCustomFetcher<TTestMutation, TTestMutationVariables>(TestDocument, variables)(),
+        options
+      );`);
 
       expect(out.content).toMatchSnapshot();
       await validateTypeScript(mergeOutputs(out), schema, docs, config, false);
@@ -117,31 +133,43 @@ describe('React-Query', () => {
     it('Should generate query correctly with client', async () => {
       const config = {
         fetcher: 'graphql-request',
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
 
       expect(out.prepend).toContain(
-        `import { useQuery, QueryConfig, useMutation, MutationConfig } from 'react-query';`
+        `import { useQuery, UseQueryOptions, useMutation, UseMutationOptions } from 'react-query';`
       );
       expect(out.prepend).toContain(`import { GraphQLClient } from 'graphql-request';`);
       expect(out.prepend[2])
         .toBeSimilarStringTo(`    function fetcher<TData, TVariables>(client: GraphQLClient, query: string, variables?: TVariables) {
           return async (): Promise<TData> => client.request<TData, TVariables>(query, variables);
         }`);
-      expect(out.content)
-        .toBeSimilarStringTo(`export const useTestQuery = (client: GraphQLClient, variables?: TestQueryVariables, options?: QueryConfig<TestQuery>) => 
-      useQuery<TestQuery>(
-        ['test', variables],
-        fetcher<TestQuery, TestQueryVariables>(client, TestDocument, variables),
+      expect(out.content).toBeSimilarStringTo(`export const useTestQuery = <
+          TData = TTestQuery,
+          TError = unknown
+        >(
+          client: GraphQLClient, 
+          variables?: TTestQueryVariables, 
+          options?: UseQueryOptions<TTestQuery, TError, TData>
+        ) => 
+        useQuery<TTestQuery, TError, TData>(
+          ['test', variables],
+          fetcher<TTestQuery, TTestQueryVariables>(client, TestDocument, variables),
+          options
+        );`);
+      expect(out.content).toBeSimilarStringTo(`export const useTestMutation = <
+        TError = unknown,
+        TContext = unknown
+      >(
+        client: GraphQLClient, 
+        options?: UseMutationOptions<TTestMutation, TError, TTestMutationVariables, TContext>
+      ) => 
+      useMutation<TTestMutation, TError, TTestMutationVariables, TContext>(
+        (variables?: TTestMutationVariables) => fetcher<TTestMutation, TTestMutationVariables>(client, TestDocument, variables)(),
         options
       );`);
-      expect(out.content)
-        .toBeSimilarStringTo(`    export const useTestMutation = (client: GraphQLClient, variables?: TestMutationVariables, options?: MutationConfig<TestMutation, unknown, TestMutationVariables>) => 
-    useMutation<TestMutation, unknown, TestMutationVariables>(
-      fetcher<TestMutation, TestMutationVariables>(client, TestDocument, variables),
-      options
-    );`);
 
       expect(out.content).toMatchSnapshot();
       await validateTypeScript(mergeOutputs(out), schema, docs, config, false);
@@ -154,12 +182,13 @@ describe('React-Query', () => {
         fetcher: {
           endpoint: 'http://localhost:3000/graphql',
         },
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
 
       expect(out.prepend).toContain(
-        `import { useQuery, QueryConfig, useMutation, MutationConfig } from 'react-query';`
+        `import { useQuery, UseQueryOptions, useMutation, UseMutationOptions } from 'react-query';`
       );
       expect(out.prepend[1])
         .toBeSimilarStringTo(`    function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
@@ -180,20 +209,27 @@ describe('React-Query', () => {
           return json.data;
         }
       }`);
-      expect(out.content)
-        .toBeSimilarStringTo(`export const useTestQuery = (variables?: TestQueryVariables, options?: QueryConfig<TestQuery>) => 
-      useQuery<TestQuery>(
+      expect(out.content).toBeSimilarStringTo(`export const useTestQuery = <
+        TData = TTestQuery,
+        TError = unknown
+      >(
+        variables?: TTestQueryVariables, 
+        options?: UseQueryOptions<TTestQuery, TError, TData>
+      ) => 
+      useQuery<TTestQuery, TError, TData>(
         ['test', variables],
-        fetcher<TestQuery, TestQueryVariables>(TestDocument, variables),
+        fetcher<TTestQuery, TTestQueryVariables>(TestDocument, variables),
         options
       );`);
 
-      expect(out.content)
-        .toBeSimilarStringTo(`    export const useTestMutation = (variables?: TestMutationVariables, options?: MutationConfig<TestMutation, unknown, TestMutationVariables>) => 
-    useMutation<TestMutation, unknown, TestMutationVariables>(
-      fetcher<TestMutation, TestMutationVariables>(TestDocument, variables),
-      options
-    );`);
+      expect(out.content).toBeSimilarStringTo(`export const useTestMutation = <
+        TError = unknown,
+        TContext = unknown
+      >(options?: UseMutationOptions<TTestMutation, TError, TTestMutationVariables, TContext>) => 
+      useMutation<TTestMutation, TError, TTestMutationVariables, TContext>(
+        (variables?: TTestMutationVariables) => fetcher<TTestMutation, TTestMutationVariables>(TestDocument, variables)(),
+        options
+      );`);
 
       expect(out.content).toMatchSnapshot();
       await validateTypeScript(mergeOutputs(out), schema, docs, config, false);
@@ -209,12 +245,13 @@ describe('React-Query', () => {
             },
           },
         },
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
 
       expect(out.prepend[1])
-        .toBeSimilarStringTo(`    function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
+        .toBeSimilarStringTo(`function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
         return async (): Promise<TData> => {
           const res = await fetch("http://localhost:3000/graphql", {
             method: "POST",
@@ -243,12 +280,13 @@ describe('React-Query', () => {
         fetcher: {
           endpoint: 'process.env.ENDPOINT_URL',
         },
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
 
       expect(out.prepend[1])
-        .toBeSimilarStringTo(`    function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
+        .toBeSimilarStringTo(`function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
         return async (): Promise<TData> => {
           const res = await fetch(process.env.ENDPOINT_URL as string, {
             method: "POST",
@@ -276,6 +314,7 @@ describe('React-Query', () => {
         fetcher: {
           endpoint: 'myEndpoint',
         },
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
@@ -309,28 +348,40 @@ describe('React-Query', () => {
     it('Should generate query and mutation correctly', async () => {
       const config = {
         fetcher: 'fetch',
+        typesPrefix: 'T',
       };
 
       const out = (await plugin(schema, docs, config)) as Types.ComplexPluginOutput;
 
       expect(out.prepend).toContain(
-        `import { useQuery, QueryConfig, useMutation, MutationConfig } from 'react-query';`
+        `import { useQuery, UseQueryOptions, useMutation, UseMutationOptions } from 'react-query';`
       );
 
-      expect(out.content)
-        .toBeSimilarStringTo(`export const useTestQuery = (dataSource: { endpoint: string, fetchParams?: RequestInit }, variables?: TestQueryVariables, options?: QueryConfig<TestQuery>) => 
-      useQuery<TestQuery>(
+      expect(out.content).toBeSimilarStringTo(`export const useTestQuery = <
+        TData = TTestQuery,
+        TError = unknown
+      >(
+        dataSource: { endpoint: string, fetchParams?: RequestInit }, 
+        variables?: TTestQueryVariables, 
+        options?: UseQueryOptions<TTestQuery, TError, TData>
+      ) => 
+      useQuery<TTestQuery, TError, TData>(
         ['test', variables],
-        fetcher<TestQuery, TestQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, TestDocument, variables),
+        fetcher<TTestQuery, TTestQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, TestDocument, variables),
         options
       );`);
 
-      expect(out.content)
-        .toBeSimilarStringTo(`    export const useTestMutation = (dataSource: { endpoint: string, fetchParams?: RequestInit }, variables?: TestMutationVariables, options?: MutationConfig<TestMutation, unknown, TestMutationVariables>) => 
-      useMutation<TestMutation, unknown, TestMutationVariables>(
-        fetcher<TestMutation, TestMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, TestDocument, variables),
-        options
-      );`);
+      expect(out.content).toBeSimilarStringTo(`export const useTestMutation = <
+          TError = unknown,
+          TContext = unknown
+        >(
+          dataSource: { endpoint: string, fetchParams?: RequestInit }, 
+          options?: UseMutationOptions<TTestMutation, TError, TTestMutationVariables, TContext>
+        ) => 
+        useMutation<TTestMutation, TError, TTestMutationVariables, TContext>(
+          (variables?: TTestMutationVariables) => fetcher<TTestMutation, TTestMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, TestDocument, variables)(),
+          options
+        );`);
 
       expect(out.content).toMatchSnapshot();
       await validateTypeScript(mergeOutputs(out), schema, docs, config, false);

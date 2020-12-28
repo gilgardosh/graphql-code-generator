@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout Master
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Configure Git Credentials
         run: |
           git config --global user.email "theguild-bot@users.noreply.github.com"
@@ -22,7 +24,7 @@ jobs:
           git checkout master
           git reset --hard
       - name: Use Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: '14.x'
       - name: Setup NPM credentials

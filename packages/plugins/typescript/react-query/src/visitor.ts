@@ -13,13 +13,36 @@ import { FetchFetcher } from './fetcher-fetch';
 import { HardcodedFetchFetcher } from './fetcher-fetch-hardcoded';
 import { GraphQLRequestClientFetcher } from './fetcher-graphql-request';
 import { CustomMapperFetcher } from './fetcher-custom-mapper';
+import { pascalCase } from 'pascal-case';
 
 export interface ReactQueryPluginConfig extends ClientSideBasePluginConfig {}
+
+export interface ReactQueryMethodMap {
+  query: {
+    hook: string;
+    options: string;
+  };
+  mutation: {
+    hook: string;
+    options: string;
+  };
+}
 
 export class ReactQueryVisitor extends ClientSideBaseVisitor<ReactQueryRawPluginConfig, ReactQueryPluginConfig> {
   private _externalImportPrefix: string;
   public fetcher: FetcherRenderer;
   public reactQueryIdentifiersInUse = new Set<string>();
+
+  public queryMethodMap: ReactQueryMethodMap = {
+    query: {
+      hook: 'useQuery',
+      options: 'UseQueryOptions',
+    },
+    mutation: {
+      hook: 'useMutation',
+      options: 'UseMutationOptions',
+    },
+  };
 
   constructor(
     schema: GraphQLSchema,
@@ -76,6 +99,11 @@ export class ReactQueryVisitor extends ClientSideBaseVisitor<ReactQueryRawPlugin
     operationVariablesTypes: string,
     hasRequiredVariables: boolean
   ): string {
+    const operationName: string = this.convertName(node.name?.value ?? '', {
+      suffix: this.config.omitOperationSuffix ? '' : pascalCase(operationType),
+      useTypesPrefix: false,
+    });
+
     operationResultType = this._externalImportPrefix + operationResultType;
     operationVariablesTypes = this._externalImportPrefix + operationVariablesTypes;
 
@@ -83,6 +111,7 @@ export class ReactQueryVisitor extends ClientSideBaseVisitor<ReactQueryRawPlugin
       return this.fetcher.generateQueryHook(
         node,
         documentVariableName,
+        operationName,
         operationResultType,
         operationVariablesTypes,
         hasRequiredVariables
@@ -91,6 +120,7 @@ export class ReactQueryVisitor extends ClientSideBaseVisitor<ReactQueryRawPlugin
       return this.fetcher.generateMutationHook(
         node,
         documentVariableName,
+        operationName,
         operationResultType,
         operationVariablesTypes
       );
